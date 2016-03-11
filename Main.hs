@@ -82,12 +82,14 @@ genString f i len len2 str | length str > len2 = return str
                                w <- getHiragana
                                genString f i len len2 (str ++ w)
 
+genMatrix :: Int -> Int -> [String] -> Fay [String] 
 genMatrix i len str | i > len = return str
                     | otherwise = do
                         r <-randomIO
-                        let l = len -4
+                        let ll = 15
+                            l = ll -4
                             r' = r `mod` l
-                        s <- genString 0 r' l len ""
+                        s <- genString 0 r' l ll ""
                         genMatrix (i+1) len (str++[s])
 
 {-
