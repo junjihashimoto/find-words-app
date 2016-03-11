@@ -40,6 +40,7 @@ hiragana1 = [
            
 hiragana = hiragana0 ++ hiragana1
 
+{-
 hwords = [
   "いぬ",
   "ねこ",
@@ -51,15 +52,16 @@ hwords = [
   "えんぴつ",
   "ごはん"
   ]
-
+-}
 hlen = length hiragana
 h0len = length hiragana0
-wlen = length hwords
+--wlen = length hwords
 
 
-getWord = do
+getWord ws = do
   i <- randomIO
-  return (hwords !! (i `mod` wlen))
+  let wlen = length ws
+  return (ws !! (i `mod` wlen))
    
 getHiragana = do
   i <- randomIO
@@ -71,26 +73,26 @@ getHiragana0 = do
 
 
 
-genString f i len len2 str | length str > len2 = return str
-                           | length str > len  = do
-                               w <- getHiragana0
-                               genString f i len len2 (str ++ w)
-                           | length str >= i && f == 0 = do
-                               w <- getWord
-                               genString 1 i len len2 (str ++ w)
-                           | otherwise = do
-                               w <- getHiragana
-                               genString f i len len2 (str ++ w)
+genString ws f i len len2 str | length str > len2 = return str
+                              | length str > len  = do
+                                  w <- getHiragana0
+                                  genString ws f i len len2 (str ++ w)
+                              | length str >= i && f == 0 = do
+                                  w <- getWord ws
+                                  genString ws 1 i len len2 (str ++ w)
+                              | otherwise = do
+                                  w <- getHiragana
+                                  genString ws f i len len2 (str ++ w)
 
-genMatrix :: Int -> Int -> [String] -> Fay [String] 
-genMatrix i len str | i > len = return str
-                    | otherwise = do
-                        r <-randomIO
-                        let ll = 15
-                            l = ll -4
-                            r' = r `mod` l
-                        s <- genString 0 r' l ll ""
-                        genMatrix (i+1) len (str++[s])
+genMatrix :: [String] -> Int -> Int -> [String] -> Fay [String] 
+genMatrix ws i len str | i > len = return str
+                       | otherwise = do
+                           r <-randomIO
+                           let ll = 15
+                               l = ll -4
+                               r' = r `mod` l
+                           s <- genString ws 0 r' l ll ""
+                           genMatrix ws (i+1) len (str++[s])
 
 {-
 main = do
@@ -104,16 +106,28 @@ alert :: String -> Fay ()
 alert = ffi "alert(%1)"
 
 setBodyHtml :: String -> Fay ()
-setBodyHtml = ffi "document.body.innerHTML = %1"
+setBodyHtml = ffi "document.getElementById('lists').innerHTML = %1"
+
+getInputs :: Fay [String]
+getInputs = ffi "document.getElementById('InputTextarea').value.split(/\\r\\n|\\r|\\n/)"
 
 addWindowEvent :: String -> (Event -> Fay ()) -> Fay ()
 addWindowEvent = ffi "window.addEventListener(%1, %2)"
 
+addClickEvent  :: (Event -> Fay ()) -> Fay ()
+addClickEvent = ffi "document.getElementById('genProb').addEventListener('click', %1)"
+
 greet :: Event -> Fay()
 greet event = do
-  s <- genMatrix 0 10 []
-  setBodyHtml $ foldr (++) "" $ map (\t -> t++"<br/><br/>") s 
+  ws <- getInputs
+  s <- genMatrix ws 0 10 []
+  let str = foldr (++) "" $ map (\t -> "<li class='list-group-item'><h3>"++t++"</h3></li>") s
+  setBodyHtml $ str
 
+ready :: Fay () -> Fay ()
+ready = ffi "window['jQuery'](%1)"
+                 
 main :: Fay ()
-main = do
+main = ready $ do
+  addClickEvent greet
   addWindowEvent "load" greet
