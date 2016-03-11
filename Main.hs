@@ -85,10 +85,16 @@ genString f i len len2 str | length str > len2 = return str
 genMatrix i len str | i > len = return str
                     | otherwise = do
                         r <-randomIO
-                        let r' = r `mod` len
-                        s <- genString 0 r' (len-4) len ""
+                        let l = len -4
+                            r' = r `mod` l
+                        s <- genString 0 r' l len ""
                         genMatrix (i+1) len (str++[s])
 
+{-
+main = do
+  s <- genMatrix 0 10 []
+  putStr $ foldr (++) "" $ map (\t -> t++"\n") s 
+-}
 
 data Event
 
@@ -104,7 +110,7 @@ addWindowEvent = ffi "window.addEventListener(%1, %2)"
 greet :: Event -> Fay()
 greet event = do
   s <- genMatrix 0 10 []
-  setBodyHtml $ foldr (++) "" $ map (\t -> t++"<br/>") s 
+  setBodyHtml $ foldr (++) "" $ map (\t -> t++"<br/><br/>") s 
 
 main :: Fay ()
 main = do
