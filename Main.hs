@@ -76,25 +76,26 @@ getHiragana0 = do
 
 
 
-genString ws f i len len2 str | length str > len2 = return str
-                              | length str > len  = do
-                                  w <- getHiragana0
-                                  genString ws f i len len2 (str ++ w)
-                              | length str >= i && f == 0 = do
-                                  w <- getWord ws
-                                  genString ws 1 i len len2 (str ++ w)
-                              | otherwise = do
-                                  w <- getHiragana
-                                  genString ws f i len len2 (str ++ w)
+genString word' ws f i len len2 str | length str > len2 = return str
+                                    | length str > len  = do
+                                       w <- getHiragana0
+                                       genString word' ws f i len len2 (str ++ w)
+                                    | length str >= i && f == 0 = do
+                                        genString word' ws 1 i len len2 (str ++ word')
+                                    | otherwise = do
+                                        w <- getHiragana
+                                        genString word' ws f i len len2 (str ++ w)
 
 genMatrix :: [String] -> Int -> Int -> [String] -> Fay [String] 
 genMatrix ws i len str | i > len = return str
                        | otherwise = do
                            r <-randomIO
-                           let ll = 21
-                               l = ll -4
+                           w <- getWord ws
+                           let wl = length w
+                               ll = 21
+                               l = ll - wl
                                r' = r `mod` l
-                           s <- genString ws 0 r' l ll ""
+                           s <- genString w ws 0 r' l ll ""
                            genMatrix ws (i+1) len (str++[s])
 
 {-
