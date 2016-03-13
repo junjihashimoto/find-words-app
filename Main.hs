@@ -91,7 +91,7 @@ genMatrix ws i len str | i > len = return str
                        | otherwise = do
                            r <-randomIO
                            w <- getWord ws
-                           let wl = length w
+                           let wl = length w + 2
                                ll = 21
                                l = ll - wl
                                r' = r `mod` l
