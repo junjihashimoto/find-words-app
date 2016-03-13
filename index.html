@@ -15,8 +15,8 @@
        function setupHighlight(){
           $('.char-item').click(function(){
             var f = $(this).attr('flag');
-            $(this).attr('style',f ? 'background:#ffffff':'background:#00ffff');
-            $(this).attr('flag',f ? 0 :1);
+            $(this).attr('style',f == 1 ? 'background:#ffffff':'background:#00ffff');
+            $(this).attr('flag',f == 1 ? 0 :1);
           });
        }
     </script>
@@ -42,6 +42,8 @@
 がっこう
 からす
 えんぴつ
+しょうぼうしゃ
+たきび
 ごはん</textarea></div>
           <div class="col-md-2">
 	    <div class="btn-group" role="group" aria-label="...">
